@@ -1,70 +1,76 @@
 package server;
 
-import server.logic.ClientLogic;
-import server.logic.states.InitState;
+import server.logic.ClientHelloLogic;
+import server.logic.Logic;
+import server.packet.PacketBodyReader;
+import server.packet.PacketHandler;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
 
 public class Client {
-	public final int                    id;
-	public final SocketChannel          channel;
-	public final SelectionKey           key;
-	public final ServerResourceProvider provider;
-	public       int                    index;
-	public       String                 name;
-	private      ClientLogic            logic;
+    public final  int                    id;
+    public final  SocketChannel          channel;
+    public final  SelectionKey           key;
+    public final  ServerResourceProvider provider;
+    private final PacketBodyReader       reader;
+    public        int                    index;
+    public        String                 name;
+    private       Logic                  logic;
 
-	public Client(int id, SocketChannel channel, SelectionKey key, ServerResourceProvider provider, int index) {
-		this.id = id;
-		this.channel = channel;
-		this.key = key;
-		this.provider = provider;
-		this.index = index;
-		this.name = null;
-		this.logic = null;
+    public Client(int id, SocketChannel channel, SelectionKey key, ServerResourceProvider provider, int index) {
+        this.id       = id;
+        this.channel  = channel;
+        this.key      = key;
+        this.provider = provider;
+        this.index    = index;
+        this.name     = null;
+        this.logic    = new ClientHelloLogic(this);
+        this.reader   = new PacketBodyReader();
+    }
 
-		this.logic.onInit();
-	}
+    public boolean isReady() {
+        return this.name != null;
+    }
 
-	public void initLogic() {
-		this.logic = new InitState(this, this.provider);
-	}
+    public void setLogic(Logic logic) {
+        this.logic = logic;
+    }
 
-	public void handleRead() {
-		ClientLogic next = this.logic.step();
+    public void sendPacket(ByteBuffer buffer) {
+        this.provider.sendManager().addPacket(this, buffer);
+    }
 
-		if (next == null)
-			return;
+    public void handleRead() {
+        try {
+            PacketBodyReader.Result result = this.reader.read(this.channel);
 
-		this.logic.onFin();
-		next.onInit();
+            if (result != null)
+                PacketHandler.dispatch(result.type, result.buffer, this.logic);
+        } catch (Exception e) {
+            this.provider.clientManager().removeClient(this.id);
+        }
+    }
 
-		this.logic = next;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Client client = (Client) o;
+        return id == client.id;
+    }
 
-	public boolean isReady() {
-		return this.name != null;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		Client client = (Client) o;
-		return id == client.id;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public String toString() {
-		return "Client{" + "id=" + id + ", name='" + name + '\'' + '}';
-	}
+    @Override
+    public String toString() {
+        return "Client{" + "id=" + id + ", name='" + name + '\'' + '}';
+    }
 }

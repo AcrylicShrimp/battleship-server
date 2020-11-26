@@ -12,6 +12,7 @@ Table for all packets are below.
 
 | ID | Name | Description | Data |
 | --- | --- | --- | --- |
+| 00001 | server-hello | First packet of the server to notify its id after successful client-hello | clientName: string |
 | 10001 | notify-lobby-enter-lobby | Notifies the clients in the lobby that a new client has entered the lobby | clientId: int, clientName: string |
 | 10002 | notify-lobby-leave-lobby | Notifies the clients in the lobby that a client has left the lobby | clientId: int |
 | 10003 | notify-lobby-room-created | Notifies the clients in the lobby that a new room has been created. | roomId: int, roomName: string |
@@ -32,7 +33,9 @@ Table for all packets are below.
 | ID | Name | Description | Data |
 | --- | --- | --- | --- |
 | 20001 | client-hello | First packet of clients to set its name | name: string |
-| 20101 | request-enter-room | Requests to enter the room | roomId: int |
-| 20102 | request-leave-room | Requests to leave the room | N/A |
+| 20101 | request-create-room | Requests to create a new room | roomName: string |
+| 20102 | request-enter-room | Requests to enter the room | roomId: int |
+| 20103 | request-leave-room | Requests to leave the room | N/A |
+| 20104 | request-rename-room | Requests to rename the room | roomName: string |
 | 40001 | chat-normal | Sends a chat | message: string |
 | 40002 | chat-whisper | Sends a whisper chat to the specific client | clientId: int, message: string |

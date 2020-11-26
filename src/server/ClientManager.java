@@ -1,5 +1,7 @@
 package server;
 
+import server.packet.PacketBuilder;
+
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
@@ -8,84 +10,92 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public class ClientManager extends ServerResource {
-	private final Random                        random;
-	private final ArrayList<Client>             clientList;
-	private final HashMap<SelectionKey, Client> clientMap;
+public class ClientManager
+        extends ServerResource {
+    private final Random                        random;
+    private final ArrayList<Client>             clientList;
+    private final HashMap<SelectionKey, Client> clientMap;
 
-	public ClientManager(ServerResourceProvider provider) {
-		super(provider);
-		this.random = new Random(System.currentTimeMillis() + (long) (Math.random() * 1000000));
-		this.clientList = new ArrayList<>();
-		this.clientMap = new HashMap<>();
-	}
+    public ClientManager(ServerResourceProvider provider) {
+        super(provider);
+        this.random     = new Random(System.currentTimeMillis() + (long) (Math.random() * 1000000));
+        this.clientList = new ArrayList<>();
+        this.clientMap  = new HashMap<>();
+    }
 
-	public Client addClient(SocketChannel channel) {
-		SelectionKey key;
+    public Client addClient(SocketChannel channel) {
+        SelectionKey key;
 
-		try {
-			key = channel.register(this.provider.selector(), SelectionKey.OP_READ);
-		} catch (ClosedChannelException e) {
-			return null;
-		}
+        try {
+            key = channel.register(this.provider.selector(), SelectionKey.OP_READ);
+        } catch (ClosedChannelException e) {
+            return null;
+        }
 
-		Client client = new Client(this.random.nextInt(), channel, key, this.provider, this.clientList.size());
-		client.initLogic();
-		this.clientList.add(client);
-		this.clientMap.put(key, client);
-		return client;
-	}
+        Client client = new Client(this.random.nextInt(), channel, key, this.provider, this.clientList.size());
+        this.clientList.add(client);
+        this.clientMap.put(key, client);
+        return client;
+    }
 
-	public Client removeClient(int id) {
-		if (this.clientList.isEmpty())
-			return null;
+    public Client removeClient(int id) {
+        if (this.clientList.isEmpty())
+            return null;
 
-		Integer index = this.findClient(id);
+        Integer index = this.findClient(id);
 
-		if (index == null)
-			return null;
+        if (index == null)
+            return null;
 
-		Client client     = this.clientList.get(index);
-		Client lastClient = this.clientList.get(this.clientList.size() - 1);
-		lastClient.index = index;
-		this.clientList.set(index, lastClient);
-		this.clientList.remove(this.clientList.size() - 1);
-		this.clientMap.remove(client.key);
+        Client client     = this.clientList.get(index);
+        Client lastClient = this.clientList.get(this.clientList.size() - 1);
+        lastClient.index = index;
+        this.clientList.set(index, lastClient);
+        this.clientList.remove(this.clientList.size() - 1);
+        this.clientMap.remove(client.key);
 
-		this.provider.lobbyManager().leaveRoom(client);
+        this.provider.sendManager().removeClient(client);
 
-		try {
-			client.key.cancel();
-			client.channel.close();
-		} catch (IOException e) {
-		}
+        if (this.provider.lobbyManager().removeClient(client))
+            this.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyLeaveLobby(client));
 
-		return client;
-	}
+        Room room = this.provider.roomManager().leaveRoom(client);
 
-	private Integer findClient(int id) {
-		int index = 0;
-		int size  = this.clientList.size();
-		for (; index < size; ++index)
-			if (this.clientList.get(index).id == id)
-				break;
+        if (room != null)
+            room.broadcast(PacketBuilder.buildNotifyRoomLeaveRoom(client));
 
-		if (index == size)
-			return null;
+        try {
+            client.key.cancel();
+            client.channel.close();
+        } catch (IOException e) {
+        }
 
-		return index;
-	}
+        return client;
+    }
 
-	public Client getClientById(int id) {
-		Integer index = this.findClient(id);
+    private Integer findClient(int id) {
+        int index = 0;
+        int size  = this.clientList.size();
+        for (; index < size; ++index)
+            if (this.clientList.get(index).id == id)
+                break;
 
-		if (index == null)
-			return null;
+        if (index == size)
+            return null;
 
-		return this.clientList.get(index);
-	}
+        return index;
+    }
 
-	public Client getClientByKey(SelectionKey key) {
-		return this.clientMap.get(key);
-	}
+    public Client getClientById(int id) {
+        Integer index = this.findClient(id);
+
+        if (index == null)
+            return null;
+
+        return this.clientList.get(index);
+    }
+
+    public Client getClientByKey(SelectionKey key) {
+        return this.clientMap.get(key);
+    }
 }
