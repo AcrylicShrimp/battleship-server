@@ -12,7 +12,7 @@ Table for all packets are below.
 
 | ID | Name | Description | Data |
 | --- | --- | --- | --- |
-| 00001 | server-hello | First packet of the server to notify its id after successful client-hello | clientName: string |
+| 00001 | server-hello | First packet of the server to notify its id after successful client-hello | clientId: int, clientName: string |
 | 10001 | notify-lobby-enter-lobby | Notifies the clients in the lobby that a new client has entered the lobby | clientId: int, clientName: string |
 | 10002 | notify-lobby-leave-lobby | Notifies the clients in the lobby that a client has left the lobby | clientId: int |
 | 10003 | notify-lobby-room-created | Notifies the clients in the lobby that a new room has been created. | roomId: int, roomName: string |
@@ -22,7 +22,7 @@ Table for all packets are below.
 | 10102 | notify-room-leave-room | Notifies the clients in the room that a client has left the room | clientId: int |
 | 10103 | notify-room-room-renamed | Notifies the clients in the room that the room name has been changed. | roomName: string |
 | 10201 | notify-lobby | Notifies a client that it is now in the lobby | clientNum: int, clients: {clientId: int, clientName: string}[], roomNum: int, rooms: {roomId: int, roomName: string}[] |
-| 10202 | notify-room | Notifies a client that it is now in the room | roomId: int, clientNum: int, clientId: int[], clientName: string[] |
+| 10202 | notify-room | Notifies a client that it is now in the room | roomId: int, roomName: string, clientNum: int, {clientId: int, clientName: string}[] |
 | 30001 | broadcast-chat-normal | Broadcasts a chat | clientId: int, clientName: string, message: string |
 | 30002 | broadcast-chat-whisper | Broadcasts a whisper chat | clientId: int, clientName: string, message: string |
 | 70001 | reject-enter-room-notfound | Notifies a client that the requested room has been removed | N/A |

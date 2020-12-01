@@ -23,5 +23,7 @@ public class ClientHelloLogic
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyEnterLobby(this.client));
         this.client.provider.lobbyManager().addClient(this.client);
         this.client.setLogic(new LobbyLogic(this.client));
+
+        System.out.printf("The client %s has been entered lobby.\n", this.client);
     }
 }

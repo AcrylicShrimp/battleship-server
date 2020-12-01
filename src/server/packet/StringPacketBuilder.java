@@ -12,11 +12,11 @@ public class StringPacketBuilder implements PacketBuilder {
 
 	@Override
 	public int size() {
-		return Integer.BYTES + this.buffer.position();
+		return Integer.BYTES + this.buffer.limit();
 	}
 
 	@Override
 	public void put(ByteBuffer buffer) {
-		buffer.putInt(this.buffer.position()).put(this.buffer);
+		buffer.putInt(this.buffer.limit()).put(this.buffer);
 	}
 }

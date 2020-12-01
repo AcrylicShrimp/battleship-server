@@ -17,15 +17,16 @@ public class SendManager
     }
 
     public void addPacket(Client client, ByteBuffer buffer) {
+        buffer = buffer.slice();
         ArrayDeque<ByteBuffer> buffers = this.clientMap.get(client);
 
         if (buffers != null) {
-            buffers.add(buffer.slice());
+            buffers.add(buffer);
             return;
         }
 
         buffers = new ArrayDeque<>();
-        buffers.addLast(buffer.slice());
+        buffers.addLast(buffer);
         this.clientMap.put(client, buffers);
     }
 
@@ -40,7 +41,7 @@ public class SendManager
             try {
                 ArrayDeque<ByteBuffer> buffers = entry.getValue();
 
-                for (; !buffers.isEmpty(); ) {
+                while (!buffers.isEmpty()) {
                     ByteBuffer buffer = buffers.getFirst();
                     entry.getKey().channel.write(buffer);
 

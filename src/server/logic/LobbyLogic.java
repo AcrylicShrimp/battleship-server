@@ -31,6 +31,8 @@ public class LobbyLogic
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyRoomCreated(room));
         this.client.sendPacket(PacketBuilder.buildNotifyRoom(room, new ArrayList<>()));
         this.client.setLogic(new RoomLogic(this.client, room));
+
+        System.out.printf("The client %s has been created a new room %s.\n", this.client, room);
     }
 
     @Override
@@ -48,6 +50,8 @@ public class LobbyLogic
         this.client.sendPacket(PacketBuilder.buildNotifyRoom(room,
                                                              room.clientList.stream().filter(other -> !other.equals(client)).collect(Collectors.toList())));
         this.client.setLogic(new RoomLogic(this.client, room));
+
+        System.out.printf("The client %s has been entered into the room %s.\n", this.client, room);
     }
 
     @Override
@@ -58,6 +62,8 @@ public class LobbyLogic
     @Override
     public void handle(Packet.ChatNormal packet) {
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildBroadcastChatNormal(this.client, packet.message));
+
+        System.out.printf("The client %s has been sent a message in the lobby: %s\n", this.client, packet.message);
     }
 
     @Override
@@ -68,5 +74,7 @@ public class LobbyLogic
             return;
 
         target.sendPacket(PacketBuilder.buildBroadcastChatWhisper(this.client, packet.message));
+
+        System.out.printf("The client %s has been sent a message to the client %s: %s\n", this.client, target, packet.message);
     }
 }

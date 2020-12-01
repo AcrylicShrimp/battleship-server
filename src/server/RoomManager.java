@@ -6,14 +6,14 @@ import java.util.Random;
 
 public class RoomManager
         extends ServerResource {
-    private final Random                 random;
+    private final Random random;
     private final HashMap<Integer, Room> roomMap;
-    private final HashMap<Client, Room>  clientRoomMap;
+    private final HashMap<Client, Room> clientRoomMap;
 
     public RoomManager(ServerResourceProvider provider) {
         super(provider);
-        this.random        = new Random(System.currentTimeMillis() + (long) (Math.random() * 1000000));
-        this.roomMap       = new HashMap<>();
+        this.random = new Random(System.currentTimeMillis() + (long) (Math.random() * 1000000));
+        this.roomMap = new HashMap<>();
         this.clientRoomMap = new HashMap<>();
     }
 
@@ -28,7 +28,7 @@ public class RoomManager
         if (this.clientRoomMap.containsKey(client))
             return null;
 
-        int  id   = this.random.nextInt();
+        int id = this.random.nextInt();
         Room room = new Room(this.provider, id, name);
         room.clientList.add(client);
 
@@ -81,8 +81,10 @@ public class RoomManager
         room.clientList.remove(client);
         this.clientRoomMap.remove(client);
 
-        if (room.clientList.isEmpty())
-            this.roomMap.remove(room);
+        if (room.clientList.isEmpty()) {
+            this.roomMap.remove(room.id);
+            System.out.println(this.roomMap.size());
+        }
 
         return room;
     }

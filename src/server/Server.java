@@ -10,11 +10,11 @@ import java.util.Iterator;
 
 public class Server
         implements ServerResourceProvider {
-    private Selector      selector;
-    private SendManager   sendManager;
+    private Selector selector;
+    private SendManager sendManager;
     private ClientManager clientManager;
-    private LobbyManager  lobbyManager;
-    private RoomManager   roomManager;
+    private LobbyManager lobbyManager;
+    private RoomManager roomManager;
 
     public void run(int port) {
         try {
@@ -23,25 +23,29 @@ public class Server
             serverSocketChannel.configureBlocking(false);
             serverSocketChannel.bind(new InetSocketAddress(port));
             serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
-            this.sendManager   = new SendManager(this);
+            this.sendManager = new SendManager(this);
             this.clientManager = new ClientManager(this);
-            this.lobbyManager  = new LobbyManager(this);
-            this.roomManager   = new RoomManager(this);
+            this.lobbyManager = new LobbyManager(this);
+            this.roomManager = new RoomManager(this);
 
             for (; ; ) {
-                this.selector.select(5);
-                Iterator<SelectionKey> iterator = this.selector.selectedKeys().iterator();
+                if (this.selector.selectNow() != 0) {
+                    Iterator<SelectionKey> iterator = this.selector.selectedKeys().iterator();
 
-                while (iterator.hasNext()) {
-                    SelectionKey key = iterator.next();
+                    while (iterator.hasNext()) {
+                        SelectionKey key = iterator.next();
 
-                    if (key.isAcceptable())
-                        this.handleAccept(serverSocketChannel);
-                    else if (key.isReadable())
-                        this.handleRead(this.clientManager.getClientByKey(key));
+                        if (key.isAcceptable())
+                            this.handleAccept(serverSocketChannel);
+                        else if (key.isReadable())
+                            this.handleRead(this.clientManager.getClientByKey(key));
+
+                        iterator.remove();
+                    }
                 }
 
                 this.sendManager.push();
+                Thread.yield();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,7 +55,9 @@ public class Server
     private void handleAccept(ServerSocketChannel channel) throws IOException {
         SocketChannel clientChannel = channel.accept();
         clientChannel.configureBlocking(false);
-        this.clientManager.addClient(clientChannel);
+        Client client = this.clientManager.addClient(clientChannel);
+
+        System.out.printf("A new client %s has been connected.\n", client);
     }
 
     private void handleRead(Client client) {
@@ -59,7 +65,7 @@ public class Server
             client.handleRead();
         } catch (Exception e) {
             this.clientManager.removeClient(client.id);
-            System.out.printf("The client %s has been removed due to %s.", client, e.getMessage());
+            System.out.printf("The client %s has been removed due to %s.\n", client, e.getMessage());
         }
     }
 

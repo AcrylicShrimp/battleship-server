@@ -8,27 +8,26 @@ import server.packet.PacketHandler;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Objects;
 
 public class Client {
-    public final  int                    id;
-    public final  SocketChannel          channel;
-    public final  SelectionKey           key;
-    public final  ServerResourceProvider provider;
-    private final PacketBodyReader       reader;
-    public        int                    index;
-    public        String                 name;
-    private       Logic                  logic;
+    public final int id;
+    public final SocketChannel channel;
+    public final SelectionKey key;
+    public final ServerResourceProvider provider;
+    private final PacketBodyReader reader;
+    public int index;
+    public String name;
+    private Logic logic;
 
     public Client(int id, SocketChannel channel, SelectionKey key, ServerResourceProvider provider, int index) {
-        this.id       = id;
-        this.channel  = channel;
-        this.key      = key;
+        this.id = id;
+        this.channel = channel;
+        this.key = key;
         this.provider = provider;
-        this.index    = index;
-        this.name     = null;
-        this.logic    = new ClientHelloLogic(this);
-        this.reader   = new PacketBodyReader();
+        this.index = index;
+        this.name = null;
+        this.logic = new ClientHelloLogic(this);
+        this.reader = new PacketBodyReader();
     }
 
     public boolean isReady() {
@@ -50,6 +49,7 @@ public class Client {
             if (result != null)
                 PacketHandler.dispatch(result.type, result.buffer, this.logic);
         } catch (Exception e) {
+            e.printStackTrace();
             this.provider.clientManager().removeClient(this.id);
         }
     }
@@ -66,7 +66,7 @@ public class Client {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return id;
     }
 
     @Override

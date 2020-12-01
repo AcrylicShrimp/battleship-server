@@ -2,19 +2,18 @@ package server;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Room
         implements BroadcastGroup {
     public final ServerResourceProvider provider;
-    public final ArrayList<Client>      clientList;
-    public       int                    id;
-    public       String                 name;
+    public final ArrayList<Client> clientList;
+    public int id;
+    public String name;
 
     public Room(ServerResourceProvider provider, int id, String name) {
-        this.provider   = provider;
-        this.id         = id;
-        this.name       = name;
+        this.provider = provider;
+        this.id = id;
+        this.name = name;
         this.clientList = new ArrayList<>();
     }
 
@@ -30,7 +29,14 @@ public class Room
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Room{" +
+                "name='" + name + '\'' +
+                '}';
     }
 
     @Override

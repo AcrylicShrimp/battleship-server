@@ -37,6 +37,8 @@ public class RoomLogic
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyEnterLobby(this.client));
         this.client.provider.lobbyManager().addClient(this.client);
         this.client.setLogic(new LobbyLogic(this.client));
+
+        System.out.printf("The client %s has been left the room %s.\n", this.client, this.room);
     }
 
     @Override
@@ -46,11 +48,15 @@ public class RoomLogic
 
         this.room.broadcast(PacketBuilder.buildNotifyRoomRoomRenamed(this.room));
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyRoomRenamed(this.room));
+
+        System.out.printf("The client %s has been renamed the room %s.\n", this.client, this.room);
     }
 
     @Override
     public void handle(Packet.ChatNormal packet) {
         this.room.broadcast(PacketBuilder.buildBroadcastChatNormal(this.client, packet.message));
+
+        System.out.printf("The client %s has been sent a message in the room %s: %s\n", this.client, this.room, packet.message);
     }
 
     @Override
@@ -61,5 +67,7 @@ public class RoomLogic
             return;
 
         target.sendPacket(PacketBuilder.buildBroadcastChatWhisper(this.client, packet.message));
+
+        System.out.printf("The client %s has been sent a message to the client %s: %s\n", this.client, target, packet.message);
     }
 }

@@ -4,6 +4,7 @@ import server.Client;
 import server.Room;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,10 +23,6 @@ public interface PacketBuilder {
 
     private static RoomPacketBuilder pack(Room value) {
         return new RoomPacketBuilder(value);
-    }
-
-    private static ListPacketBuilder<PacketBuilder> pack(PacketBuilder... values) {
-        return new ListPacketBuilder<PacketBuilder>(values);
     }
 
     private static <T extends PacketBuilder> ListPacketBuilder<T> packBuilders(T[] values) {
@@ -53,17 +50,27 @@ public interface PacketBuilder {
     }
 
     private static ByteBuffer build(int code) {
-        return ByteBuffer.allocateDirect(Integer.BYTES * 2).putInt(code).putInt(0);
+        return ByteBuffer.allocate(Integer.BYTES * 2).putInt(code).putInt(0).flip();
     }
 
     private static ByteBuffer build(int code, PacketBuilder builder) {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(Integer.BYTES * 2 + builder.size()).putInt(code).putInt(builder.size());
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES * 2 + builder.size()).putInt(code).putInt(builder.size());
         builder.put(buffer);
-        return buffer;
+        return buffer.flip();
+    }
+
+    private static ByteBuffer build(int code, PacketBuilder... builders) {
+        int size = Arrays.stream(builders).map(builder -> builder.size()).reduce(0, Integer::sum);
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES * 2 + size).putInt(code).putInt(size);
+
+        for (PacketBuilder builder : builders)
+            builder.put(buffer);
+
+        return buffer.flip();
     }
 
     static ByteBuffer buildServerHello(Client client) {
-        return build(00001, pack(client.id));
+        return build(00001, pack(client));
     }
 
     static ByteBuffer buildNotifyLobbyEnterLobby(Client client) {
@@ -99,19 +106,19 @@ public interface PacketBuilder {
     }
 
     static ByteBuffer buildNotifyLobby(Collection<Client> clients, Collection<Room> rooms) {
-        return build(10201, pack(packClients(clients), packRooms(rooms)));
+        return build(10201, packClients(clients), packRooms(rooms));
     }
 
     static ByteBuffer buildNotifyRoom(Room room, Collection<Client> clients) {
-        return build(10202, pack(pack(room), packClients(clients)));
+        return build(10202, pack(room), packClients(clients));
     }
 
     static ByteBuffer buildBroadcastChatNormal(Client client, String message) {
-        return build(30001, pack(pack(client), pack(message)));
+        return build(30001, pack(client), pack(message));
     }
 
     static ByteBuffer buildBroadcastChatWhisper(Client client, String message) {
-        return build(30002, pack(pack(client), pack(message)));
+        return build(30002, pack(client), pack(message));
     }
 
     static ByteBuffer buildRejectEnterRoomNotFound() {
