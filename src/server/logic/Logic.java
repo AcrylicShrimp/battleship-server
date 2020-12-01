@@ -10,5 +10,5 @@ public abstract class Logic extends PacketHandler {
         this.client = client;
     }
 
-    public abstract void handleEvent(String type);
+    public abstract void handleEvent(String type, Object arg);
 }

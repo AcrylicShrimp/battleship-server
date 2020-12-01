@@ -113,6 +113,34 @@ public interface PacketBuilder {
         return build(10202, pack(room), packClients(clients));
     }
 
+    static ByteBuffer buildGameInit(boolean isBlue) {
+        return build(80001, pack(isBlue ? 1 : 0));
+    }
+
+    static ByteBuffer buildGameBegin() {
+        return build(80002);
+    }
+
+    static ByteBuffer buildGameTurn(boolean isMyTurn) {
+        return build(80003, pack(isMyTurn ? 1 : 0));
+    }
+
+    static ByteBuffer buildGameFireFriendly(int x, int y, boolean hit) {
+        return build(80004, pack(x), pack(y), pack(hit ? 1 : 0));
+    }
+
+    static ByteBuffer buildGameFireEnemy(int x, int y, boolean hit) {
+        return build(80005, pack(x), pack(y), pack(hit ? 1 : 0));
+    }
+
+    static ByteBuffer buildGameFireRejected() {
+        return build(80006);
+    }
+
+    static ByteBuffer buildGameSet(boolean won) {
+        return build(80007, pack(won ? 1 : 0));
+    }
+
     static ByteBuffer buildBroadcastChatNormal(Client client, String message) {
         return build(30001, pack(client), pack(message));
     }

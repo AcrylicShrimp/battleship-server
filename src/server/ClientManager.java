@@ -65,6 +65,8 @@ public class ClientManager
         if (room != null)
             room.broadcast(PacketBuilder.buildNotifyRoomLeaveRoom(client));
 
+        this.provider.gameManager().removeClient(client);
+
         try {
             client.key.cancel();
             client.channel.close();

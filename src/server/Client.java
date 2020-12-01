@@ -42,6 +42,10 @@ public class Client {
         this.provider.sendManager().addPacket(this, buffer);
     }
 
+    public void sendEvent(String type, Object arg) {
+        this.logic.handleEvent(type, arg);
+    }
+
     public void handleRead() {
         try {
             PacketBodyReader.Result result = this.reader.read(this.channel);

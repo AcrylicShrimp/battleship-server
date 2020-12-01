@@ -81,10 +81,8 @@ public class RoomManager
         room.clientList.remove(client);
         this.clientRoomMap.remove(client);
 
-        if (room.clientList.isEmpty()) {
+        if (room.clientList.isEmpty())
             this.roomMap.remove(room.id);
-            System.out.println(this.roomMap.size());
-        }
 
         return room;
     }

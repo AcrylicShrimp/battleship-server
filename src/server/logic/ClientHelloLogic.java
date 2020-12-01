@@ -11,7 +11,7 @@ public class ClientHelloLogic
     }
 
     @Override
-    public void handleEvent(String type) {
+    public void handleEvent(String type, Object arg) {
         // Do nothing.
     }
 

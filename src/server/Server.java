@@ -15,6 +15,7 @@ public class Server
     private ClientManager clientManager;
     private LobbyManager lobbyManager;
     private RoomManager roomManager;
+    private GameManager gameManager;
 
     public void run(int port) {
         try {
@@ -27,6 +28,7 @@ public class Server
             this.clientManager = new ClientManager(this);
             this.lobbyManager = new LobbyManager(this);
             this.roomManager = new RoomManager(this);
+            this.gameManager = new GameManager(this);
 
             for (; ; ) {
                 if (this.selector.selectNow() != 0) {
@@ -92,5 +94,10 @@ public class Server
     @Override
     public RoomManager roomManager() {
         return this.roomManager;
+    }
+
+    @Override
+    public GameManager gameManager() {
+        return this.gameManager;
     }
 }

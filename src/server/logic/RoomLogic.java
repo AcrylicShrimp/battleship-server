@@ -1,6 +1,7 @@
 package server.logic;
 
 import server.Client;
+import server.Game;
 import server.Room;
 import server.packet.Packet;
 import server.packet.PacketBuilder;
@@ -15,8 +16,13 @@ public class RoomLogic
     }
 
     @Override
-    public void handleEvent(String type) {
-        // Do nothing.
+    public void handleEvent(String type, Object arg) {
+        if (type.equals("game:init")) {
+            Game.EventArg.Init init = (Game.EventArg.Init) arg;
+            this.client.sendPacket(PacketBuilder.buildGameInit(init.isBlue));
+            this.client.setLogic(new GameLogic(this.client, init));
+            this.client.provider.roomManager().leaveRoom(this.client);
+        }
     }
 
     @Override
@@ -50,6 +56,17 @@ public class RoomLogic
         this.client.provider.lobbyManager().broadcast(PacketBuilder.buildNotifyLobbyRoomRenamed(this.room));
 
         System.out.printf("The client %s has been renamed the room %s.\n", this.client, this.room);
+    }
+
+    @Override
+    public void handle(Packet.RequestStartGame packet) {
+        if (this.room.clientList.size() != 2)
+            return;
+
+        Game game = new Game(this.room.provider, this.room.clientList.get(0), this.room.clientList.get(1));
+        this.client.provider.gameManager().addGame(game);
+
+        System.out.printf("The client %s has been started a new game.\n", this.client);
     }
 
     @Override

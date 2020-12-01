@@ -12,4 +12,6 @@ public interface ServerResourceProvider {
 	LobbyManager lobbyManager();
 
 	RoomManager roomManager();
+
+	GameManager gameManager();
 }

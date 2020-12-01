@@ -23,6 +23,13 @@ Table for all packets are below.
 | 10103 | notify-room-room-renamed | Notifies the clients in the room that the room name has been changed. | roomName: string |
 | 10201 | notify-lobby | Notifies a client that it is now in the lobby | clientNum: int, clients: {clientId: int, clientName: string}[], roomNum: int, rooms: {roomId: int, roomName: string}[] |
 | 10202 | notify-room | Notifies a client that it is now in the room | roomId: int, roomName: string, clientNum: int, {clientId: int, clientName: string}[] |
+| 80001 | notify-game-init | Notifies the clients in to room that a new game has been initialized | isBlue: int |
+| 80002 | notify-game-begin | Notifies the clients in the game that the game has been began | N/A |
+| 80003 | notify-game-turn | Notifies the clients in the game that the turn has been changed | isMyTurn: int |
+| 80004 | notify-game-fire-friendly | Notifies the client in the game that the friendly fired | x: int, y: int, hit: int |
+| 80005 | notify-game-fire-enemy | Notifies the client in the game that the enemy fired | x: int, y: int, hit: int |
+| 80006 | notify-game-fire-rejected | Notifies the client in the game that the fire has been rejected | N/A |
+| 80007 | notify-game-set | Notifies the clients in the game that the game has been set | won: int |
 | 30001 | broadcast-chat-normal | Broadcasts a chat | clientId: int, clientName: string, message: string |
 | 30002 | broadcast-chat-whisper | Broadcasts a whisper chat | clientId: int, clientName: string, message: string |
 | 70001 | reject-enter-room-notfound | Notifies a client that the requested room has been removed | N/A |
@@ -37,5 +44,8 @@ Table for all packets are below.
 | 20102 | request-enter-room | Requests to enter the room | roomId: int |
 | 20103 | request-leave-room | Requests to leave the room | N/A |
 | 20104 | request-rename-room | Requests to rename the room | roomName: string |
+| 20105 | request-start-game | Requests to start a new game | N/A |
+| 90001 | game-init | Send the game board | {x: int, y: int, rotate: int}[4] |
+| 90002 | game-fire | Fire to the specified location | x: int, y: int |
 | 40001 | chat-normal | Sends a chat | message: string |
 | 40002 | chat-whisper | Sends a whisper chat to the specific client | clientId: int, message: string |

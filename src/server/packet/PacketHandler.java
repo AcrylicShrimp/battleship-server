@@ -20,6 +20,15 @@ public class PacketHandler {
             case PacketType.REQUEST_RENAME_ROOM:
                 handler.handle(new Packet.RequestRenameRoom(buffer));
                 break;
+            case PacketType.REQUEST_START_GAME:
+                handler.handle(new Packet.RequestStartGame());
+                break;
+            case PacketType.GAME_INIT:
+                handler.handle(new Packet.GameInit(buffer));
+                break;
+            case PacketType.GAME_FIRE:
+                handler.handle(new Packet.GameFire(buffer));
+                break;
             case PacketType.CHAT_NORMAL:
                 handler.handle(new Packet.ChatNormal(buffer));
                 break;
@@ -48,6 +57,18 @@ public class PacketHandler {
     }
 
     public void handle(Packet.RequestRenameRoom packet) {
+        // Do nothing.
+    }
+
+    public void handle(Packet.RequestStartGame packet) {
+        // Do nothing.
+    }
+
+    public void handle(Packet.GameInit packet) {
+        // Do nothing.
+    }
+
+    public void handle(Packet.GameFire packet) {
         // Do nothing.
     }
 
